@@ -5,6 +5,7 @@ import com.kamu.finance_tracker.dto.TransactionRequest;
 import com.kamu.finance_tracker.dto.TransactionResponse;
 import com.kamu.finance_tracker.entity.TransactionType;
 import com.kamu.finance_tracker.repository.UserRepository;
+import com.kamu.finance_tracker.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,13 +33,13 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     @PostMapping
     public ResponseEntity<TransactionResponse> create(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody TransactionRequest request) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(transactionService.create(userId, request));
     }
@@ -46,7 +47,7 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAll(
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.getAll(userId));
     }
 
@@ -55,7 +56,7 @@ public class TransactionController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long id,
             @Valid @RequestBody TransactionRequest request) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.update(userId, id, request));
     }
 
@@ -63,15 +64,9 @@ public class TransactionController {
     public ResponseEntity<Void> delete(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long id) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         transactionService.delete(userId, id);
         return ResponseEntity.noContent().build();
-    }
-
-    private Long getUserId(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"))
-                .getId();
     }
 
     @GetMapping("/paginated")
@@ -79,7 +74,7 @@ public class TransactionController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.getAllPaginated(userId, page, size));
     }
 
@@ -89,7 +84,7 @@ public class TransactionController {
             @RequestParam Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.filterByCategory(userId, categoryId, page, size));
     }
 
@@ -99,7 +94,7 @@ public class TransactionController {
             @RequestParam TransactionType type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.filterByType(userId, type, page, size));
     }
 
@@ -110,7 +105,7 @@ public class TransactionController {
             @RequestParam LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.filterByDateRange(userId, startDate, endDate, page, size));
     }
 
@@ -119,7 +114,7 @@ public class TransactionController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam int month,
             @RequestParam int year) {
-        Long userId = getUserId(userDetails.getUsername());
+        Long userId = authService.getUserId(userDetails.getUsername());
         return ResponseEntity.ok(transactionService.getMonthlySummary(userId, month, year));
     }
 }
