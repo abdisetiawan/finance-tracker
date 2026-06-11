@@ -23,3 +23,12 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
   packages-to-scan: com.kamu.finance_tracker
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
