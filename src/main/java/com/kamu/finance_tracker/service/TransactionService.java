@@ -11,6 +11,8 @@ import com.kamu.finance_tracker.repository.TransactionRepository;
 import com.kamu.finance_tracker.repository.UserRepository;
 import com.kamu.finance_tracker.dto.TransactionResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,24 +30,34 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
 
     public TransactionResponse create(Long userId, TransactionRequest request) {
+        log.info("Creating transaction for userId={}, amount={}, type={}",
+                userId, request.getAmount(), request.getType());
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+                .orElseThrow(() -> {
+                    log.error("User not found for userId={}", userId);
+                    return new RuntimeException("User tidak ditemukan");
+                });
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category tidak ditemukan"));
+                .orElseThrow(() -> {
+                    log.error("Category not found for categoryId={}", request.getCategoryId());
+                    return new RuntimeException("Category tidak ditemukan");
+                });
 
-        Transaction transaction = Transaction.builder()
+        Transaction saved = transactionRepository.save(Transaction.builder()
                 .user(user)
                 .category(category)
                 .amount(request.getAmount())
                 .type(request.getType())
                 .note(request.getNote())
                 .date(request.getDate())
-                .build();
+                .build());
 
-        Transaction saved = transactionRepository.save(transaction);
+        log.info("Transaction created successfully, transactionId={}", saved.getId());
         return toResponse(saved);
     }
 
@@ -78,14 +90,21 @@ public class TransactionService {
     }
 
     public void delete(Long userId, Long transactionId) {
+        log.info("Deleting transactionId={} for userId={}", transactionId, userId);
+
         Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaksi tidak ditemukan"));
+                .orElseThrow(() -> {
+                    log.error("Transaction not found, transactionId={}", transactionId);
+                    return new RuntimeException("Transaksi tidak ditemukan");
+                });
 
         if (!transaction.getUser().getId().equals(userId)) {
+            log.error("Unauthorized delete attempt, transactionId={} userId={}", transactionId, userId);
             throw new RuntimeException("Transaksi bukan milik user ini");
         }
 
         transactionRepository.delete(transaction);
+        log.info("Transaction deleted successfully, transactionId={}", transactionId);
     }
 
     private TransactionResponse toResponse(Transaction transaction) {
