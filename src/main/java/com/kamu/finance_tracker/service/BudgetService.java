@@ -66,11 +66,11 @@ public class BudgetService {
                 .toList();
     }
 
-    public BudgetResponse update(Long id, Long userId, BudgetRequest request) {
+    public BudgetResponse update(Long id, Long userId, BigDecimal amount) {
         Budget budget = budgetRepository.findByIdAndUserId(id,userId)
                 .orElseThrow(() -> new RuntimeException("Budget tidak ditemukan"));
 
-        budget.setAmount(request.getAmount());
+        budget.setAmount(amount);
 
         Budget saved = budgetRepository.save(budget);
         return toResponse(saved);

@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +48,6 @@ class AuthServiceTest {
                 .email("budi@gmail.com")
                 .fullName("Budi Santoso")
                 .passwordHash("hashed_password")
-                .createdAt(LocalDateTime.now())
                 .build();
 
         registerRequest = new RegisterRequest();

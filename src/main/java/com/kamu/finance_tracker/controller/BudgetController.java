@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -52,9 +53,9 @@ public class BudgetController {
     public ResponseEntity<BudgetResponse> update(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long id,
-            @Valid @RequestBody BudgetRequest request) {
+            @RequestParam BigDecimal amount) {
         Long userId = authService.getUserId(userDetails.getUsername());
-        return ResponseEntity.ok(budgetService.update(id,userId, request));
+        return ResponseEntity.ok(budgetService.update(id,userId, amount));
     }
 
     @DeleteMapping("/{id}")

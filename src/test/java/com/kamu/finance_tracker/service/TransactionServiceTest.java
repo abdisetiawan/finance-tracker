@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +52,6 @@ class TransactionServiceTest {
                 .email("budi@gmail.com")
                 .fullName("Budi Santoso")
                 .passwordHash("hashed")
-                .createdAt(LocalDateTime.now())
                 .build();
 
         mockCategory = Category.builder()
@@ -77,7 +75,6 @@ class TransactionServiceTest {
                 .type(TransactionType.INCOME)
                 .note("Gaji bulan ini")
                 .date(LocalDate.of(2025, 1, 1))
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 
